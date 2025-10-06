@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net472</TargetFramework>
-        <LangVersion>10.0</LangVersion>
+        <LangVersion>12.0</LangVersion>
         <Nullable>disable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -62,11 +62,11 @@
             <HintPath>$(GamePath)Renderer\Renderite.Renderer_Data\Managed\Renderite.Shared.dll</HintPath>
         </Reference>
         <Reference Include="Klak.Spout">
-            <HintPath>$(GamePath)Renderer\BepInEx\plugins\RenderBridgeRenderer\Klak.Spout.dll</HintPath>
+            <HintPath>$(GamePath)Renderer\BepInEx\plugins\ResoniteSpoutRenderer\Klak.Spout.dll</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="Klak.Spout.Editor">
-            <HintPath>$(GamePath)Renderer\BepInEx\plugins\RenderBridgeRenderer\Klak.Spout.Editor.dll</HintPath>
+            <HintPath>$(GamePath)Renderer\BepInEx\plugins\ResoniteSpoutRenderer\Klak.Spout.Editor.dll</HintPath>
             <Private>False</Private>
         </Reference>
     </ItemGroup>

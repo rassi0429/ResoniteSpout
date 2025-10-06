@@ -9,35 +9,90 @@ using Renderite.Unity;
 using UnityEngine;
 using Klak.Spout;
 using RenderBridge;
+using Renderite.Shared;
+
+
+public enum SpoutCommandType
+{
+    Create,
+    Delete,
+    Update,
+}
+public class SpoutCommand : RendererCommand
+{
+    public SpoutCommandType Type;
+    public string SpoutName = "";
+    public int AssetId;
+
+    public override void Pack(ref MemoryPacker packer)
+    {
+        packer.Write(Type);
+        packer.Write(AssetId);
+        packer.Write(SpoutName);
+    }
+
+    public override void Unpack(ref MemoryUnpacker unpacker)
+    {
+        unpacker.Read(ref Type);
+        unpacker.Read(ref AssetId);
+        unpacker.Read(ref SpoutName);
+    }
+}
+
 
 namespace ResoniteSpoutRenderer
 {
-    [BepInPlugin("zokasu.ResoniteSpout", "ResoniteSpoutEngine", "1.2.0")]
+    [BepInPlugin("zokasu.ResoniteSpout", "ResoniteSpoutRenderer", "0.1.0")]
     public class RenderBridgeRenderer : BaseUnityPlugin
     {
         public static ManualLogSource Log;
 
         private Messenger _msg;
         private readonly ConcurrentQueue<Action> _mainQueue = new();
-
-        public static int activeRenderTextureId = -1;
-
-        private static int[] allowedHeight = { 512 };
+        
         
 
         // Spout
-        private GameObject _senderGO;
-        private SpoutSender _sender;
         private const string SpoutName = "RenderBridgeRT";
         
 
         // もしカメラの最終画像を送りたい時用の簡易ブリッタ（任意）
-        private Camera _mainCam;
         private RenderTexture _fallbackRT;
-        public bool UseCameraBlitIfNoRT = false;
+
+        private static Dictionary<string, SpoutStruct> spouts = new();
         
-        static Dictionary<string, IntPtr> plugins = new Dictionary<string, IntPtr>();
-        static Dictionary<string, Texture2D> sharedTextures = new Dictionary<string, Texture2D>();
+        public class SpoutStruct
+        {
+            public int assetId;
+            public IntPtr spoutSender;
+            public Texture2D sharedTexture;
+            
+            public void GetOrCreateSharedTexture()
+            {
+                if (spoutSender == IntPtr.Zero)
+                {
+                    Log.LogError($"Sender is null");
+                    return;
+                }
+
+                var ptr = PluginEntry.GetTexturePointer(spoutSender);
+                if (ptr != IntPtr.Zero)
+                {
+                    Texture2D sharedTexture = UnityEngine.Texture2D.CreateExternalTexture(
+                        PluginEntry.GetTextureWidth(spoutSender),
+                        PluginEntry.GetTextureHeight(spoutSender),
+                        UnityEngine.TextureFormat.ARGB32,false,false,ptr);
+                    sharedTexture.hideFlags = HideFlags.DontSave;
+                    this.sharedTexture = sharedTexture;
+                    Log.LogInfo($"Created shared texture {assetId}!");
+                }
+                else
+                {
+                    Log.LogInfo($"Texture pointer for ID: {assetId} is null!");
+                }
+            }
+        }
+
 
         void Awake()
         {
@@ -45,7 +100,7 @@ namespace ResoniteSpoutRenderer
             Log = Logger;
 
             // Messenger
-            _msg = new Messenger("ResoniteSpoutEngine");
+            _msg = new Messenger("Zozokasu.ResoniteSpout", [typeof(SpoutCommand)]);
             // SpoutSender をアタッチした GameObject を常駐させる
             // _senderGO = new GameObject("[ResoniteSpoutEngine SpoutSender]");
             // DontDestroyOnLoad(_senderGO);
@@ -55,16 +110,22 @@ namespace ResoniteSpoutRenderer
             // _sender.sourceTexture = Texture2D.blackTexture;
 
             // RTAssetId を受けたらメインスレッドで割り当て
-            _msg.ReceiveValue<int>("RTAssetId", assetId =>
+            _msg.ReceiveObject<SpoutCommand>("SpoutCommand", (command) =>
             {
-                _mainQueue.Enqueue(() => AssignRTToSender(assetId));
+                _mainQueue.Enqueue(() => ProcessCommand(command));
+                Log.LogInfo($"Command {command.Type} received!, Camera: {command.SpoutName}, ID: {command.AssetId}");
             });
+
+            _msg.ReceiveString("DbgMessage", (s =>
+            {
+                Log.LogInfo($"[INTERPROCESS DEBUG]: {s}");
+            } ));
 
             Log.LogInfo("[ResoniteSpoutRenderer] Initialized. Waiting for RTAssetId…");
             Log.LogInfo($"{SystemInfo.graphicsDeviceType}");
 
-            Harmony harmony = new Harmony("dev.zozokasu.renderBridge");
-            harmony.PatchAll();
+            // Harmony harmony = new Harmony("dev.zozokasu.renderBridge");
+            // harmony.PatchAll();
         }
 
         void Update()
@@ -76,11 +137,7 @@ namespace ResoniteSpoutRenderer
                 catch (Exception e) { Log.LogError(e); }
             }
             
-            SendRenderTexture(activeRenderTextureId);
-            foreach (var p in plugins)
-            {
-                Util.IssuePluginEvent(PluginEntry.Event.Update, p.Value);
-            }
+            SendRenderTexture();
         }
         
         void OnDestroy()
@@ -92,84 +149,88 @@ namespace ResoniteSpoutRenderer
                     _fallbackRT.Release();
                     Destroy(_fallbackRT);
                 }
-                if (_senderGO != null) Destroy(_senderGO);
             }
             catch { /* ignore */ }
         }
-
-        static IntPtr GetOrCreatePlugin(int assetId)
+        
+        static SpoutStruct GetOrCreateSpout(string spoutName, int assetId)
         {
-            string key = assetId.ToString();
-            if (!plugins.ContainsKey(key))
+            SpoutStruct spout = new();
+            spout.assetId = assetId;
+            if (!spouts.ContainsKey(spoutName))
             {
-                IntPtr plugin = PluginEntry.CreateSender($"[ResoniteSpoutRenderer]-{assetId}", 512,512);
-                if (plugin == IntPtr.Zero)
+                RenderTexture texture = RenderingManager.Instance.RenderTextures.GetAsset(assetId).Texture;
+                spout.spoutSender = PluginEntry.CreateSender($"[ResoniteSpoutRenderer]-{spoutName}", texture.width,texture.height);
+                if (spout.spoutSender == IntPtr.Zero)
                 {
                     Log.LogInfo($"Failed to create Spout sender ID{assetId}");
-                    return IntPtr.Zero;
                 }
-                plugins.Add(key, plugin);
-                Log.LogInfo($"Created Spout sender ID{assetId}!");
+                Log.LogInfo($"Created Spout sender \"[ResoniteSpoutRenderer]-{spoutName}\"!");
             }
-            return plugins[key];
+            return spout;
         }
-
-        static Texture2D GetOrCreateSharedTexture(IntPtr plugin)
-        {
-            if (plugin == IntPtr.Zero)
-            {
-                return null;
-            }
-            string key = plugins.FirstOrDefault(x => x.Value == plugin).Key;
-
-            if (!sharedTextures.ContainsKey(key))
-            {
-                var ptr = PluginEntry.GetTexturePointer(plugin);
-                if (ptr != IntPtr.Zero)
-                {
-                    UnityEngine.Texture2D sharedTexture = UnityEngine.Texture2D.CreateExternalTexture(
-                        PluginEntry.GetTextureWidth(plugin),
-                        PluginEntry.GetTextureHeight(plugin),
-                        UnityEngine.TextureFormat.ARGB32,false,false,ptr);
-                    sharedTexture.hideFlags = HideFlags.DontSave;
-                    sharedTextures.Add(key,sharedTexture);
-                    Log.LogInfo($"Created shared texture {key}!");
-                }
-            }
-            return sharedTextures[key];
-        }
-
+        
+        
         // ===== ここが肝：RT をそのまま Spout に渡す =====
-        private void AssignRTToSender(int assetId)
+        private void ProcessCommand(SpoutCommand command)
         {
-            activeRenderTextureId = assetId;
-            Log.LogInfo($"Activated renderer ID{assetId}!");
-            try
+            switch (command.Type)
             {
-            }
-            catch (Exception e)
-            {
-                Log.LogError(e);
+                case SpoutCommandType.Create:
+                    if (spouts.ContainsKey(command.SpoutName)) break;
+                    
+                    SpoutStruct spout = GetOrCreateSpout(command.SpoutName, command.AssetId);
+                    spouts.Add(command.SpoutName, spout);
+                    break;
+                
+                case SpoutCommandType.Update:
+                    if (spouts.ContainsKey(command.SpoutName))
+                    {
+                        spouts[command.SpoutName].assetId = command.AssetId;
+                        RenderTexture texture = RenderingManager.Instance.RenderTextures.GetAsset(command.AssetId).Texture;
+                        PluginEntry.DestroySharedObject(spouts[command.SpoutName].spoutSender);
+                        spouts[command.SpoutName].spoutSender = PluginEntry.CreateSender($"[ResoniteSpoutRenderer] - {command.SpoutName}", texture.width, texture.height);
+                    }
+                    break;
+                
+                case SpoutCommandType.Delete:
+                    if (spouts.ContainsKey(command.SpoutName))
+                    {
+                        PluginEntry.DestroySharedObject(spouts[command.SpoutName].spoutSender);
+                        spouts.Remove(command.SpoutName);
+                    }
+                    break;
             }
         }
         
-        static void SendRenderTexture(int assetId)
+        static void SendRenderTexture()
         {
-            RenderTexture source = RenderingManager.Instance.RenderTextures.GetAsset(assetId).Texture;
-            IntPtr plugin = GetOrCreatePlugin(assetId);
-            Util.IssuePluginEvent(PluginEntry.Event.Update, plugin);
-            Texture2D sharedTexture = GetOrCreateSharedTexture(plugin);
-
-            if (plugin == IntPtr.Zero || sharedTexture == null)
+            foreach (var spout in spouts.Values)
             {
-                Log.LogInfo("spout not ready or sharedTexture is null");
-                return;
-            }
+                int assetId = spout.assetId;
+                RenderTexture source = RenderingManager.Instance.RenderTextures.GetAsset(assetId).Texture;
+                if (spout.spoutSender == IntPtr.Zero)
+                {
+                    Log.LogInfo("spout not ready!");
+                    continue;
+                }
+
+                if (spout.sharedTexture == null)
+                {
+                    spout.GetOrCreateSharedTexture();
+                    continue;
+                }
                 
-            var tempRt = UnityEngine.RenderTexture.GetTemporary(sharedTexture.width, sharedTexture.height);
-            Graphics.Blit(source, tempRt, new Vector2(1.0f, -1.0f), new Vector2(0.0f, 1.0f));
-            Graphics.CopyTexture(tempRt, sharedTexture);
-            RenderTexture.ReleaseTemporary(tempRt);
+                var tempRt = UnityEngine.RenderTexture.GetTemporary(spout.sharedTexture.width, spout.sharedTexture.height);
+                Graphics.Blit(source, tempRt, new Vector2(1.0f, -1.0f), new Vector2(0.0f, 1.0f));
+                Graphics.CopyTexture(tempRt, spout.sharedTexture);
+                RenderTexture.ReleaseTemporary(tempRt);
+            }
+            
+            foreach (var spout in spouts.Values)
+            {
+                Util.IssuePluginEvent(PluginEntry.Event.Update, spout.spoutSender);
+            }
                 
         }
         
