@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RenderBridge", "RenderBridge\RenderBridge\RenderBridge.csproj", "{417F10CA-DD1B-488C-9EA8-367A2D1336F6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RenderBridgeRenderer", "RenderBridgeRenderer\RenderBridgeRenderer.csproj", "{DF26CD27-FAF2-43B5-9C61-21DB744E0BEF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{417F10CA-DD1B-488C-9EA8-367A2D1336F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{417F10CA-DD1B-488C-9EA8-367A2D1336F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{417F10CA-DD1B-488C-9EA8-367A2D1336F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{417F10CA-DD1B-488C-9EA8-367A2D1336F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF26CD27-FAF2-43B5-9C61-21DB744E0BEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF26CD27-FAF2-43B5-9C61-21DB744E0BEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF26CD27-FAF2-43B5-9C61-21DB744E0BEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF26CD27-FAF2-43B5-9C61-21DB744E0BEF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
