@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RenderBridge", "RenderBridge\RenderBridge\RenderBridge.csproj", "{417F10CA-DD1B-488C-9EA8-367A2D1336F6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResoniteSpoutEngine", "RenderBridge\ResoniteSpoutEngine\ResoniteSpoutEngine.csproj", "{417F10CA-DD1B-488C-9EA8-367A2D1336F6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RenderBridgeRenderer", "RenderBridgeRenderer\RenderBridgeRenderer.csproj", "{DF26CD27-FAF2-43B5-9C61-21DB744E0BEF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResoniteSpoutRenderer", "ResoniteSpoutRenderer\ResoniteSpoutRenderer.csproj", "{DF26CD27-FAF2-43B5-9C61-21DB744E0BEF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

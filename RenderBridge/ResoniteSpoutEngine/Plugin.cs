@@ -14,7 +14,7 @@ namespace RenderBridge;
 
 [ResonitePlugin(PluginMetadata.GUID, PluginMetadata.NAME, PluginMetadata.VERSION, PluginMetadata.AUTHORS, PluginMetadata.REPOSITORY_URL)]
 [BepInDependency(BepInExResoniteShim.PluginMetadata.GUID, BepInDependency.DependencyFlags.HardDependency)]
-public class RenderBridge : BasePlugin
+public class ResoniteSpout : BasePlugin
 {
     internal static new ManualLogSource Log = null!;
     
@@ -28,7 +28,7 @@ public class RenderBridge : BasePlugin
         ResoniteHooks.OnEngineReady += OnEngineReady;
         Log.LogInfo($"Plugin {PluginMetadata.GUID} loaded (minimal DV<string> tracker).");
 
-        _messenger = new Messenger("RenderBridge");
+        _messenger = new Messenger("ResoniteSpoutEngine");
         
     }
 

@@ -1,7 +1,7 @@
 // KlakSpout - Spout video frame sharing plugin for Unity
 // https://github.com/keijiro/KlakSpout
 
-using RenderBridgeRenderer;
+using ResoniteSpoutRenderer;
 using UnityEngine;
 using UnityEngine.Rendering;
 

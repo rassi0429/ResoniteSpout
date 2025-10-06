@@ -4,7 +4,7 @@
 using UnityEngine;
 using System.Runtime.InteropServices;
 
-namespace RenderBridgeRenderer
+namespace ResoniteSpoutRenderer
 {
     static class PluginEntry
     {

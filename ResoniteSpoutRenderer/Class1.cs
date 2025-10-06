@@ -10,9 +10,9 @@ using UnityEngine;
 using Klak.Spout;
 using RenderBridge;
 
-namespace RenderBridgeRenderer
+namespace ResoniteSpoutRenderer
 {
-    [BepInPlugin("zokasu.renderbrideRenderer", "RenderBridge", "1.2.0")]
+    [BepInPlugin("zokasu.ResoniteSpout", "ResoniteSpoutEngine", "1.2.0")]
     public class RenderBridgeRenderer : BaseUnityPlugin
     {
         public static ManualLogSource Log;
@@ -45,9 +45,9 @@ namespace RenderBridgeRenderer
             Log = Logger;
 
             // Messenger
-            _msg = new Messenger("RenderBridge");
+            _msg = new Messenger("ResoniteSpoutEngine");
             // SpoutSender をアタッチした GameObject を常駐させる
-            // _senderGO = new GameObject("[RenderBridge SpoutSender]");
+            // _senderGO = new GameObject("[ResoniteSpoutEngine SpoutSender]");
             // DontDestroyOnLoad(_senderGO);
             // _sender = _senderGO.AddComponent<SpoutSender>();
             // _sender.spoutName = SpoutName;
@@ -60,7 +60,7 @@ namespace RenderBridgeRenderer
                 _mainQueue.Enqueue(() => AssignRTToSender(assetId));
             });
 
-            Log.LogInfo("[RenderBridgeRenderer] Initialized. Waiting for RTAssetId…");
+            Log.LogInfo("[ResoniteSpoutRenderer] Initialized. Waiting for RTAssetId…");
             Log.LogInfo($"{SystemInfo.graphicsDeviceType}");
 
             Harmony harmony = new Harmony("dev.zozokasu.renderBridge");
@@ -102,7 +102,7 @@ namespace RenderBridgeRenderer
             string key = assetId.ToString();
             if (!plugins.ContainsKey(key))
             {
-                IntPtr plugin = PluginEntry.CreateSender($"[RenderBridgeRenderer]-{assetId}", 512,512);
+                IntPtr plugin = PluginEntry.CreateSender($"[ResoniteSpoutRenderer]-{assetId}", 512,512);
                 if (plugin == IntPtr.Zero)
                 {
                     Log.LogInfo($"Failed to create Spout sender ID{assetId}");
