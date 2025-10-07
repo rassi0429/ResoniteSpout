@@ -29,51 +29,11 @@ public class ResoniteSpout : BasePlugin
         Log.LogInfo($"Plugin {PluginMetadata.GUID} loaded (minimal DV<string> tracker).");
 
         _messenger = new Messenger("ResoniteSpoutEngine");
-        
+        HarmonyInstance.PatchAll();
     }
 
     private void OnEngineReady()
     {
-        try
-        {
-            var harmony = new Harmony(PluginMetadata.GUID + ".dvstringtracker");
-            HarmonyInstance.PatchAll();
-            Log.LogInfo("DV<string> tracker installed.");
-        }
-        catch (Exception ex)
-        {
-            Log.LogError($"Failed to install tracker: {ex}");
-        }
-        
-        _messenger.ReceiveValue<int>("EchoReturn", (val) =>
-        {
-            Log.LogInfo($"EchoReturn: {val}");
-        });
-
-        _messenger.ReceiveValueList<byte>("RTData", (list) =>
-        {
-            Log.LogInfo($"RTData length is {list.Count}!");
-            if (list.Count != 1048576) return;
-            byte[] data = new byte[512 * 512 * 4];
-            // unsafe
-            // {
-            //     using (DeviceContext deviceContext = DeviceContext.Create())
-            //     {
-            //         IntPtr glContext = IntPtr.Zero;
-            //         glContext = deviceContext.CreateContext(IntPtr.Zero);
-            //         deviceContext.MakeCurrent(glContext);
-            //         fixed (byte* ptr = data)
-            //         {
-            //             for (int j = 0; j < 512 * 512 * 4; j++)
-            //             {
-            //                 data[j] = list[j];
-            //             }
-            //             spoutSender.SendImage(ptr, 512, 512, Gl.RGBA, true, 0);
-            //         }
-            //     }
-            // }
-            Log.LogInfo($"RTData received!");
-        });
     }
 
     [HarmonyPatch]
@@ -95,17 +55,34 @@ public class ResoniteSpout : BasePlugin
                     Log.LogInfo($"{rtp.Size}");
                 });
             }
-
-            Camera camera;
-            if (__instance.TryReadValue("TargetCamera", out camera))
-            {
-                __instance.RunInUpdates(2, () =>
-                {
-                    Log.LogInfo($"Target Camera Found!!!");
-                });
-            }
         }
         
+        [HarmonyPatch(typeof(DynamicReferenceVariable<RenderTextureProvider>), "InitializeSyncMembers")]
+        [HarmonyPostfix]
+        public static void ParentReferencePostfix(DynamicReferenceVariable<RenderTextureProvider> __instance)
+        {
+            __instance.Reference.OnTargetChange += (target =>
+            {
+                if (target.Target == null)
+                {
+                    Log.LogInfo("DynamicVariableBase_Patch: Target changed to null asset");
+                    return;
+                }
+                
+                if(target.Target.Asset == null) 
+                {
+                    Log.LogInfo("DynamicVariableBase_Patch: Target changed to null asset");
+                    return;
+                }
+                
+                Log.LogInfo("DynamicVariableBase_Patch: Target changed to " + target.Target.Asset.AssetId);
+            });
+            
+            __instance.Reference.OnReferenceChange += (reference =>
+            {
+                Log.LogInfo("DynamicVariableBase_Patch: Reference changed to " + reference);
+            });
+
+        }
     }
-    
 }
