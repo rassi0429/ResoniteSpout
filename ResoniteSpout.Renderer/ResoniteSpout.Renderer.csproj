@@ -6,6 +6,7 @@
         <Nullable>disable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <RootNamespace>ResoniteSpoutRenderer</RootNamespace>
     </PropertyGroup>
     <PropertyGroup Condition="'$(GamePath)'==''">
         <GamePath Condition="'$(ResonitePath)' != ''">$(ResonitePath)/</GamePath>
@@ -17,6 +18,11 @@
     <PropertyGroup Condition="'$(PluginPath)' == ''">
         <PluginPath Condition="Exists('C:\Users\jojoh\AppData\Roaming\Thunderstore Mod Manager\DataFolder\Resonite\profiles\Default')">C:/Users/jojoh/AppData/Roaming/Thunderstore Mod Manager/DataFolder/Resonite/profiles/Default</PluginPath>
     </PropertyGroup>
+
+    <ItemGroup>
+        <!-- Shared のコードをリンク -->
+        <Compile Include="..\ResoniteSpout.Shared\**\*.cs" />
+    </ItemGroup>
 
     <ItemGroup>
         <!-- BepInEx 5 -->
@@ -61,20 +67,12 @@
         <Reference Include="Renderite.Shared">
             <HintPath>$(GamePath)Renderer\Renderite.Renderer_Data\Managed\Renderite.Shared.dll</HintPath>
         </Reference>
-        <Reference Include="Klak.Spout">
-            <HintPath>$(GamePath)Renderer\BepInEx\plugins\ResoniteSpoutRenderer\Klak.Spout.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="Klak.Spout.Editor">
-            <HintPath>$(GamePath)Renderer\BepInEx\plugins\ResoniteSpoutRenderer\Klak.Spout.Editor.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="OpenGL.Net" Version="0.8.4" />
     </ItemGroup>
-    
+
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
         <ItemGroup>

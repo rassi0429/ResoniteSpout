@@ -5,7 +5,7 @@ using ResoniteSpoutRenderer;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace RenderBridge
+namespace ResoniteSpoutRenderer
 {
     // Internal utilities
     static class Util

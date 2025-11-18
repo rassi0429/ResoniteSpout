@@ -4,11 +4,11 @@
         <Version>1.0.0</Version>
         <Authors>YourName</Authors>
         <TargetFramework>net9.0</TargetFramework>
-        <RepositoryUrl>https://github.com/YourName/RenderBridge</RepositoryUrl>
-        <PackageId>YourName.RenderBridge</PackageId>
+        <RepositoryUrl>https://github.com/Zozokasu/ResoniteSpout</RepositoryUrl>
+        <PackageId>Zozokasu.ResoniteSpout.Engine</PackageId>
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-        <Product>RenderBridge</Product>
-        <RootNamespace>RenderBridge</RootNamespace>
+        <Product>ResoniteSpout.Engine</Product>
+        <RootNamespace>ResoniteSpout.Engine</RootNamespace>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <Deterministic>true</Deterministic>
@@ -22,6 +22,7 @@
         <RestoreAdditionalProjectSources>
             https://nuget-modding.resonite.net/v3/index.json;
         </RestoreAdditionalProjectSources>
+        <Configurations>Debug;Release;Tests</Configurations>
     </PropertyGroup>
 
     <!-- Modding dependencies -->
@@ -30,6 +31,11 @@
         <PackageReference Include="OpenGL.Net" Version="0.8.4" />
         <PackageReference Include="ResoniteModding.BepInExResoniteShim" Version="0.9.*"/>
         <PackageReference Include="ResoniteModding.BepisResoniteWrapper" Version="1.*"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- Shared のコードをリンク -->
+        <Compile Include="..\ResoniteSpout.Shared\**\*.cs" />
     </ItemGroup>
 
     <!-- NuGet fallback stripped game references -->
@@ -63,14 +69,13 @@
         </Reference>
     </ItemGroup>
 
-    <!-- Post-build copy to game plugins folder -->
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
         <ItemGroup>
-            <PluginFiles Include="$(TargetPath)"/>
-            <PluginFiles Include="$(TargetDir)$(TargetName).pdb" Condition="Exists('$(TargetDir)$(TargetName).pdb')"/>
+            <PluginFiles Include="$(TargetPath)" />
+            <PluginFiles Include="$(TargetDir)$(TargetName).pdb" Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
         </ItemGroup>
 
-        <Copy SourceFiles="@(PluginFiles)" DestinationFolder="$(PluginTargetDir)" Condition="'$(CopyToPlugins)' == 'true'"/>
-        <Message Text="Copied plugin files to $(PluginTargetDir)" Importance="high" Condition="'$(CopyToPlugins)' == 'true'"/>
+        <Copy SourceFiles="@(PluginFiles)" DestinationFolder="$(PluginTargetDir)" Condition="'$(CopyToPlugins)' == 'true'" />
+        <Message Text="Copied plugin files to $(PluginTargetDir)" Importance="high" Condition="'$(CopyToPlugins)' == 'true'" />
     </Target>
 </Project>
