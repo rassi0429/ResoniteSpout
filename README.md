@@ -44,6 +44,10 @@ You can create multiple camera setups with different names:
 - `ResoniteSpout.Studio1` → Appears as `[ResoSpout] Studio1`
 - `ResoniteSpout.Studio2` → Appears as `[ResoSpout] Studio2`
 
+### Example Camera
+
+Try example camera resonite package! [here](https://github.com/Zozokasu/ResoniteSpout/raw/refs/heads/master/CameraExample.resonitepackage)
+
 ## Configuration
 
 Edit `BepInEx/config/zozokasu.ResoniteSpout.Engine.cfg`:
