@@ -48,6 +48,7 @@ You can create multiple camera setups with different names:
 
 Try example camera resonite package! [here](https://github.com/Zozokasu/ResoniteSpout/raw/refs/heads/master/CameraExample.resonitepackage)
 
+![OBS screen after spawning the sample camera](https://github.com/user-attachments/assets/3b8550b1-680a-433f-b380-cd1aba17de92)
 ## Configuration
 
 Edit `BepInEx/config/zozokasu.ResoniteSpout.Engine.cfg`:
