@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResoniteSpoutEngine", "RenderBridge\ResoniteSpoutEngine\ResoniteSpoutEngine.csproj", "{417F10CA-DD1B-488C-9EA8-367A2D1336F6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResoniteSpout.Engine", "ResoniteSpout.Engine\ResoniteSpout.Engine.csproj", "{A754A6B7-D4C9-4941-BF9C-25ED80CDC71D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResoniteSpoutRenderer", "ResoniteSpoutRenderer\ResoniteSpoutRenderer.csproj", "{DF26CD27-FAF2-43B5-9C61-21DB744E0BEF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResoniteSpout.Renderer", "ResoniteSpout.Renderer\ResoniteSpout.Renderer.csproj", "{4E21AC3C-5F03-41BD-909A-A8E264850F8A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -10,13 +10,13 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{417F10CA-DD1B-488C-9EA8-367A2D1336F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{417F10CA-DD1B-488C-9EA8-367A2D1336F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{417F10CA-DD1B-488C-9EA8-367A2D1336F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{417F10CA-DD1B-488C-9EA8-367A2D1336F6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DF26CD27-FAF2-43B5-9C61-21DB744E0BEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DF26CD27-FAF2-43B5-9C61-21DB744E0BEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DF26CD27-FAF2-43B5-9C61-21DB744E0BEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DF26CD27-FAF2-43B5-9C61-21DB744E0BEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A754A6B7-D4C9-4941-BF9C-25ED80CDC71D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A754A6B7-D4C9-4941-BF9C-25ED80CDC71D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A754A6B7-D4C9-4941-BF9C-25ED80CDC71D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A754A6B7-D4C9-4941-BF9C-25ED80CDC71D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E21AC3C-5F03-41BD-909A-A8E264850F8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E21AC3C-5F03-41BD-909A-A8E264850F8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E21AC3C-5F03-41BD-909A-A8E264850F8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E21AC3C-5F03-41BD-909A-A8E264850F8A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
