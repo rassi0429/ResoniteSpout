@@ -76,6 +76,7 @@
         </ItemGroup>
 
         <Copy SourceFiles="@(PluginFiles)" DestinationFolder="$(PluginTargetDir)" Condition="'$(CopyToPlugins)' == 'true'" />
+        <Copy SourceFiles="@(PluginFiles)" DestinationFolder="..\out" />
         <Message Text="Copied plugin files to $(PluginTargetDir)" Importance="high" Condition="'$(CopyToPlugins)' == 'true'" />
     </Target>
 </Project>
