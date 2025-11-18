@@ -1,0 +1,7 @@
+{
+  "name": "Resonite_Spout",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/Zozokasu/ResoniteSpout",
+  "description": "Mod",
+  "dependencies": ["ResoniteModding-BepisLoader-1.5.0","ResoniteModding-BepisResoniteWrapper-1.0.1","ResoniteModding-RenderiteHook-1.1.1"]
+}
