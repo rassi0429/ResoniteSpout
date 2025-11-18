@@ -1,21 +1,114 @@
 # ResoniteSpout
 [![Thunderstore Badge](https://modding.resonite.net/assets/available-on-thunderstore.svg)](https://thunderstore.io/c/resonite/)
 
-A [Resonite](https://resonite.com/) mod that [TODO: describe what your mod does here].
+A [Resonite](https://resonite.com/) mod that enables real-time camera output streaming via [Spout](https://spout.zeal.co/) for seamless integration with OBS, vMix, and other video production software.
 
-## Installation (Manual)
-1. Install [BepisLoader](https://github.com/ResoniteModding/BepisLoader) for Resonite.
-2. Download the latest release ZIP file (e.g., `Zozokasu-ResoniteSpout-1.0.0.zip`) from the [Releases](https://github.com/Zozokasu/ResoniteSpout/releases) page.
-3. Extract the ZIP and copy the `plugins` folder to your BepInEx folder in your Resonite installation directory:
-   - **Default location:** `C:\Program Files (x86)\Steam\steamapps\common\Resonite\BepInEx\`
-4. Start the game. If you want to verify that the mod is working you can check your BepInEx logs.
+## Features
 
----
+- 🎥 **Multiple Camera Support** - Stream multiple Resonite cameras simultaneously
+- 🏷️ **Dynamic Camera Naming** - Customize Spout sender names for easy identification
+- ⚙️ **Configurable Prefixes** - Filter cameras by user-specific prefixes
+- 🔄 **Automatic Management** - Cameras are automatically created and cleaned up
+- 🚀 **Zero Latency** - Direct GPU texture sharing for minimal performance impact
 
-## Development
+## Installation
 
-### Getting Started with This Template
+### Automatic (Recommended)
+1. Install [BepisLoader](https://github.com/ResoniteModding/BepisLoader) for Resonite
+2. Install via Thunderstore mod manager or download from [Releases](https://github.com/Zozokasu/ResoniteSpout/releases)
 
-This project was created using the BepInEx Resonite template. For comprehensive setup and development instructions, see the [Creating a Project guide](https://modding.resonite.net/creating-a-mod/creating-a-project).
+## Usage
 
-**TODO: Remove this section after setting up your project**
+### Basic Setup
+
+1. Create a `DynamicVariableSpace` component and name it `ResoniteSpout.YourName`
+2. Add a `DynamicValueVariable<RenderTextureProvider>` named `TargetRTP`
+3. Connect your camera's render texture to the variable
+4. The Spout sender will appear in OBS/vMix as `[ResoSpout] YourName`
+
+### Advanced: Custom Camera Names
+
+Optionally add a `DynamicValueVariable<string>` named `CameraName`:
+```
+ResoniteSpout.YourName
+├── TargetRTP (RenderTextureProvider) → Your camera's render texture
+└── CameraName (string) → "MainCamera"
+```
+
+The Spout sender will appear as `[ResoSpout] YourName - MainCamera`
+
+### Multiple Cameras
+
+You can create multiple camera setups with different names:
+
+- `ResoniteSpout.Studio1` → Appears as `[ResoSpout] Studio1`
+- `ResoniteSpout.Studio2` → Appears as `[ResoSpout] Studio2`
+
+## Configuration
+
+Edit `BepInEx/config/zozokasu.ResoniteSpout.Engine.cfg`:
+```ini
+[General]
+# Filter to only monitor specific cameras
+# Empty = Monitor all ResoniteSpout.* spaces
+# Example: "MyName" = Only monitor "ResoniteSpout.MyName"
+SpacePrefix = 
+```
+
+## OBS Setup
+
+1. Add a **Spout2 Capture** source to your scene
+2. Select your Resonite camera from the dropdown (e.g., `[ResoSpout] YourName`)
+3. Done! The feed updates in real-time
+
+## Requirements
+
+- Resonite with BepInEx
+- [BepisResoniteWrapper](https://thunderstore.io/c/resonite/p/ResoniteModding/BepisResoniteWrapper/)
+- [RenderiteHook](https://thunderstore.io/c/resonite/p/ResoniteModding/RenderiteHook/)
+- [InterprocessLib](https://thunderstore.io/c/resonite/p/ResoniteModding/InterprocessLib/)
+- Windows with Spout-compatible graphics card
+
+## Use Cases
+
+- 🎬 **Live Streaming** - Capture Resonite worlds directly in OBS
+- 🎮 **Game Development** - Preview in-game cameras in real-time
+- 📺 **Virtual Production** - Integrate Resonite into broadcast workflows
+- 🎨 **Content Creation** - Record high-quality footage without screen capture
+
+## Troubleshooting
+
+**Camera not appearing in OBS:**
+- Verify the `DynamicVariableSpace` name starts with `ResoniteSpout.`
+- Check BepInEx logs for errors
+- Ensure both Engine and Renderer plugins are installed
+
+**Multiple cameras conflict:**
+- Each `DynamicVariableSpace` must have a unique name
+- Use different suffixes (e.g., `ResoniteSpout.Camera1`, `ResoniteSpout.Camera2`)
+
+## Building from Source
+```bash
+git clone https://github.com/Zozokasu/ResoniteSpout.git
+cd ResoniteSpout
+dotnet build -c Release
+```
+
+Output files will be in `out/`
+
+## Credits
+
+Built with:
+- [Spout](https://spout.zeal.co/) - GPU texture sharing
+- [InterprocessLib](https://github.com/Nytra/ResoniteInterprocessLib) by Nytra
+- [RenderiteHook](https://github.com/ResoniteModding/RenderiteHook) by ResoniteModding
+
+## License
+
+MIT License - See [LICENSE](LICENSE) for details
+
+## Support
+
+- 🐛 **Issues:** [GitHub Issues](https://github.com/Zozokasu/ResoniteSpout/issues)
+- 💬 **Discord:** Resonite Modding Community
+- 📖 **Docs:** [Resonite Modding Wiki](https://modding.resonite.net/)
