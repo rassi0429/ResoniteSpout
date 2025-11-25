@@ -71,13 +71,13 @@
         <PackageReference Include="OpenGL.Net" Version="0.8.4" />
     </ItemGroup>
 
-    <!-- ★ klakspout.dll をビルド時にコピー -->
     <ItemGroup>
-        <None Include="..\libs\KlakSpout.dll">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <Link>klakspout.dll</Link>
-        </None>
+      <None Update="KlakSpout.dll">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
+
+    <!-- ★ klakspout.dll をビルド時にコピー -->
 
     <!-- Thunderstore 用に out フォルダにコピー -->
     <Target Name="CopyForThunderstore" AfterTargets="PostBuildEvent">

@@ -76,7 +76,7 @@ namespace ResoniteSpoutRenderer
             {
                 if (SpoutSender != IntPtr.Zero)
                 {
-                    PluginEntry.DestroySharedObject(SpoutSender);
+                    // PluginEntry.DestroySharedObject(SpoutSender);
                     SpoutSender = IntPtr.Zero;
                 }
 
@@ -115,12 +115,16 @@ namespace ResoniteSpoutRenderer
                 // Receiver を更新してテクスチャポインタを取得
                 Util.IssuePluginEvent(PluginEntry.Event.Update, SpoutReceiver);
 
+                // CheckValid でレシーバーの状態を確認
+                bool isValid = PluginEntry.CheckValid(SpoutReceiver);
+
                 var ptr = PluginEntry.GetTexturePointer(SpoutReceiver);
                 if (ptr == IntPtr.Zero)
                 {
-                    if (InitializationAttempts > 100)
+                    if (InitializationAttempts == 100 || InitializationAttempts % 300 == 0)
                     {
-                        Log.LogError($"[Receiver:{SpoutName}] Failed to get texture pointer after {InitializationAttempts} attempts");
+                        Log.LogWarning($"[Receiver:{SpoutName}] Still waiting for texture pointer (attempt {InitializationAttempts}, valid={isValid})");
+                        Log.LogWarning($"[Receiver:{SpoutName}] Make sure the Spout source '{SpoutName}' is actively sending");
                     }
                     return false;
                 }
@@ -140,7 +144,7 @@ namespace ResoniteSpoutRenderer
                 ReceivedTexture = Texture2D.CreateExternalTexture(
                     width,
                     height,
-                    TextureFormat.ARGB32,
+                    TextureFormat.R8,  // ResoSpoutと同じフォーマット
                     false,
                     false,
                     ptr);
@@ -166,7 +170,7 @@ namespace ResoniteSpoutRenderer
             {
                 if (SpoutReceiver != IntPtr.Zero)
                 {
-                    PluginEntry.DestroySharedObject(SpoutReceiver);
+                    // PluginEntry.DestroySharedObject(SpoutReceiver);
                     SpoutReceiver = IntPtr.Zero;
                 }
 
@@ -353,6 +357,9 @@ namespace ResoniteSpoutRenderer
         {
             Log.LogInfo($"[Receiver:{spoutName}] CreateReceiver called with AssetId: {assetId}");
 
+            // 利用可能なSpoutソースをスキャン
+            ScanAndLogAvailableSpoutSources();
+
             // 既に存在する場合は削除してから作り直す
             if (receivers.ContainsKey(spoutName))
             {
@@ -386,6 +393,18 @@ namespace ResoniteSpoutRenderer
 
             receivers[spoutName] = receiverStruct;
             Log.LogInfo($"[Receiver:{spoutName}] Added to receivers dictionary. Total receivers: {receivers.Count}");
+        }
+
+        // 利用可能なSpoutソースをスキャンしてログに出力
+        private void ScanAndLogAvailableSpoutSources()
+        {
+            int count = PluginEntry.ScanSharedObjects();
+            Log.LogInfo($"[Spout] Found {count} available Spout sources:");
+            for (int i = 0; i < count; i++)
+            {
+                string name = PluginEntry.GetSharedObjectNameString(i);
+                Log.LogInfo($"  [{i}] '{name}'");
+            }
         }
 
         private void UpdateReceiver(string spoutName, int assetId)
