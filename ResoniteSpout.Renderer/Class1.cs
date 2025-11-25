@@ -45,7 +45,7 @@ namespace ResoniteSpoutRenderer
                     return false;
                 }
 
-                var ptr = PluginEntry.GetTexturePointer(SpoutSender);
+                var ptr = PluginEntry.Sender_GetTexturePointer(SpoutSender);
                 if (ptr == IntPtr.Zero)
                 {
                     if (InitializationAttempts > 100)
@@ -56,13 +56,13 @@ namespace ResoniteSpoutRenderer
                     return false;
                 }
 
-                int width = PluginEntry.GetTextureWidth(SpoutSender);
-                int height = PluginEntry.GetTextureHeight(SpoutSender);
+                int width = PluginEntry.Sender_GetTextureWidth(SpoutSender);
+                int height = PluginEntry.Sender_GetTextureHeight(SpoutSender);
                 
                 SharedTexture = Texture2D.CreateExternalTexture(
                     width,
                     height,
-                    TextureFormat.ARGB32,
+                    TextureFormat.ARGB32,  // ResoSpoutと同じ（Senderはカラー）
                     false,
                     false,
                     ptr);
@@ -113,12 +113,12 @@ namespace ResoniteSpoutRenderer
                 }
 
                 // Receiver を更新してテクスチャポインタを取得
-                Util.IssuePluginEvent(PluginEntry.Event.Update, SpoutReceiver);
+                Util.IssueReceiverPluginEvent(PluginEntry.Event.Update, SpoutReceiver);
 
                 // CheckValid でレシーバーの状態を確認
                 bool isValid = PluginEntry.CheckValid(SpoutReceiver);
 
-                var ptr = PluginEntry.GetTexturePointer(SpoutReceiver);
+                var ptr = PluginEntry.Receiver_GetTexturePointer(SpoutReceiver);
                 if (ptr == IntPtr.Zero)
                 {
                     if (InitializationAttempts == 100 || InitializationAttempts % 300 == 0)
@@ -159,7 +159,7 @@ namespace ResoniteSpoutRenderer
                 if (SpoutReceiver == IntPtr.Zero || ReceivedTexture == null)
                     return;
 
-                var ptr = PluginEntry.GetTexturePointer(SpoutReceiver);
+                var ptr = PluginEntry.Receiver_GetTexturePointer(SpoutReceiver);
                 if (ptr != IntPtr.Zero)
                 {
                     ReceivedTexture.UpdateExternalTexture(ptr);
@@ -206,6 +206,9 @@ namespace ResoniteSpoutRenderer
 
         void Update()
         {
+            // Spout DLL のポーリング
+            //PluginEntry.Poll();
+
             // メインスレッドでコマンドを処理
             while (_mainQueue.TryDequeue(out var action))
             {
@@ -288,18 +291,28 @@ namespace ResoniteSpoutRenderer
             Log.LogInfo($"[{spoutName}] RenderTexture found: {texture.width}x{texture.height}");
             
             // Spout Sender を作成
-            IntPtr sender = PluginEntry.CreateSender(spoutName, texture.width, texture.height);
-            
+            Log.LogInfo($"[{spoutName}] Calling CreateSender('{spoutName}', {texture.width}, {texture.height})...");
+            IntPtr sender;
+            try
+            {
+                sender = PluginEntry.CreateSender(spoutName, texture.width, texture.height);
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"[{spoutName}] CreateSender threw exception: {ex}");
+                return;
+            }
+
             if (sender == IntPtr.Zero)
             {
-                Log.LogError($"[{spoutName}] Failed to create Spout sender");
+                Log.LogError($"[{spoutName}] Failed to create Spout sender (returned IntPtr.Zero)");
                 return;
             }
             
             Log.LogInfo($"[{spoutName}] Spout sender created: {sender}");
-            
+
             // ★ 初期化のために Update イベントを発行
-            Util.IssuePluginEvent(PluginEntry.Event.Update, sender);
+            Util.IssueSenderPluginEvent(PluginEntry.Event.Update, sender);
             
             // SpoutStruct を作成
             var spout = new SpoutStruct
@@ -380,7 +393,7 @@ namespace ResoniteSpoutRenderer
             Log.LogInfo($"[Receiver:{spoutName}] Spout receiver created: {receiver}");
 
             // 初期化のために Update イベントを発行
-            Util.IssuePluginEvent(PluginEntry.Event.Update, receiver);
+            Util.IssueReceiverPluginEvent(PluginEntry.Event.Update, receiver);
 
             // SpoutReceiverStruct を作成
             var receiverStruct = new SpoutReceiverStruct
@@ -472,29 +485,32 @@ namespace ResoniteSpoutRenderer
                         continue;
                     }
                     
-                    // Shared Texture がまだない場合は作成を試みる
+                    // ★ ResoSpoutと同じ順序: まずUpdateを呼ぶ
+                    Util.IssueSenderPluginEvent(PluginEntry.Event.Update, spout.SpoutSender);
+
+                    // Shared Texture がまだない場合は作成を試みる（Updateの後）
                     if (spout.SharedTexture == null)
                     {
                         if (spout.InitializationAttempts < 5 || spout.InitializationAttempts % 60 == 0)
                         {
                             Log.LogInfo($"[{spoutName}] Attempting to create shared texture (attempt {spout.InitializationAttempts})...");
                         }
-                        
+
                         if (!spout.TryCreateSharedTexture())
                         {
                             continue;
                         }
                     }
-                    
+
                     RenderTexture source = rtAsset.Texture;
-                    
+
                     // Blit with vertical flip
                     var tempRt = RenderTexture.GetTemporary(
-                        spout.SharedTexture.width, 
+                        spout.SharedTexture.width,
                         spout.SharedTexture.height,
                         0,
                         RenderTextureFormat.ARGB32);
-                    
+
                     Graphics.Blit(source, tempRt, new Vector2(1.0f, -1.0f), new Vector2(0.0f, 1.0f));
                     Graphics.CopyTexture(tempRt, spout.SharedTexture);
                     RenderTexture.ReleaseTemporary(tempRt);
@@ -502,15 +518,6 @@ namespace ResoniteSpoutRenderer
                 catch (Exception e)
                 {
                     Log.LogError($"[{spoutName}] Error sending texture: {e}");
-                }
-            }
-            
-            // Update すべての Spout
-            foreach (var spout in spouts.Values)
-            {
-                if (spout.IsReady)
-                {
-                    Util.IssuePluginEvent(PluginEntry.Event.Update, spout.SpoutSender);
                 }
             }
         }
@@ -534,7 +541,7 @@ namespace ResoniteSpoutRenderer
                     }
 
                     // Receiver を更新
-                    Util.IssuePluginEvent(PluginEntry.Event.Update, receiver.SpoutReceiver);
+                    Util.IssueReceiverPluginEvent(PluginEntry.Event.Update, receiver.SpoutReceiver);
 
                     // Received Texture がまだない場合は作成を試みる
                     if (receiver.ReceivedTexture == null)

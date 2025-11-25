@@ -75,6 +75,9 @@
       <None Update="KlakSpout.dll">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="KlakSpout_send.dll">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
     <!-- ★ klakspout.dll をビルド時にコピー -->

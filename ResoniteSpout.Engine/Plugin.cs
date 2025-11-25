@@ -536,15 +536,15 @@ public static class DynamicVariableSpacePatch
 
     public static void CreateOrUpdateSpoutCamera(DynamicVariableSpace space, string suffix, int assetId, string cameraName, SpaceMonitor monitor)
     {
-        // ★ Spout 名を生成（Space の ReferenceID を含める）
+        // ★ Spout 名を生成（特殊文字を避ける）
         string spoutName;
         if (!string.IsNullOrEmpty(cameraName))
         {
-            spoutName = $"[ResoSpout] {suffix} - {cameraName}";
+            spoutName = $"ResoSpout_{suffix}_{cameraName}";
         }
         else
         {
-            spoutName = $"[ResoSpout] {suffix}";
+            spoutName = $"ResoSpout_{suffix}";
         }
         
         // ★ 同じ名前でも異なる Space の場合は別の Spout として扱う
