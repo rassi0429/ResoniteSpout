@@ -10,7 +10,7 @@ using ResoniteSpout.Shared;
 
 namespace ResoniteSpoutRenderer
 {
-    [BepInPlugin("zozokasu.ResoniteSpout.Renderer", "ResoniteSpoutRenderer", "0.1.0")]
+    [BepInPlugin("zozokasu.ResoniteSpout.Renderer", "ResoniteSpoutRenderer", "0.2.0")]
     public class ResoniteSpoutRenderer : BaseUnityPlugin
     {
         public static ManualLogSource Log;
