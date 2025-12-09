@@ -9,7 +9,9 @@
         <RootNamespace>ResoniteSpoutRenderer</RootNamespace>
     </PropertyGroup>
     <PropertyGroup Condition="'$(GamePath)'==''">
-        <GamePath>C:\Users\neo\AppData\Local\RESO Launcher\profiles\bepis\Game/</GamePath>
+		<GamePath Condition="'$(ResonitePath)' != ''">$(ResonitePath)/</GamePath>
+		<GamePath Condition="Exists('$(MSBuildProgramFiles32)\Steam\steamapps\common\Resonite\')">$(MSBuildProgramFiles32)\Steam\steamapps\common\Resonite\</GamePath>
+		<GamePath Condition="Exists('$(HOME)/.steam/steam/steamapps/common/Resonite/')">$(HOME)/.steam/steam/steamapps/common/Resonite/</GamePath>
         <PluginTargetDir>$(GamePath)Renderer\BepInEx\plugins\$(AssemblyName)</PluginTargetDir>
         <CopyToPlugins>true</CopyToPlugins>
     </PropertyGroup>
@@ -86,7 +88,8 @@
     <Target Name="CopyForThunderstore" AfterTargets="PostBuildEvent">
         <ItemGroup>
             <PluginFiles Include="$(TargetPath)" />
-            <PluginFiles Include="$(TargetDir)KlakSpout.dll" />
+			<PluginFiles Include="$(TargetDir)KlakSpout.dll" />
+			<PluginFiles Include="$(TargetDir)KlakSpout_send.dll" />
         </ItemGroup>
         <Copy SourceFiles="@(PluginFiles)" DestinationFolder="$(MSBuildThisFileDirectory)..\out\" SkipUnchangedFiles="true" />
         <Message Text="Copied $(TargetFileName) and KlakSpout.dll to ..\out\" Importance="high" />
@@ -97,7 +100,8 @@
         <ItemGroup>
             <PluginFiles Include="$(TargetPath)" />
             <PluginFiles Include="$(TargetDir)$(TargetName).pdb" Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
-            <pluginFiles Include="$(TargetDir)KlakSpout.dll" />
+			<pluginFiles Include="$(TargetDir)KlakSpout.dll" />
+			<pluginFiles Include="$(TargetDir)KlakSpout_send.dll" />
         </ItemGroup>
 
         <Copy SourceFiles="@(PluginFiles)" DestinationFolder="$(PluginTargetDir)" Condition="'$(CopyToPlugins)' == 'true'" />
